@@ -8,28 +8,30 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Make
+
+    - name: Install dependencies
+      run: sudo apt-get install -y lcov
+
+    - name: Build project
       run: |
         make
 
-    - name: Unit Tests
+    - name: Run unit tests and generate coverage info
       run: |
         make test
-        
-    - name: Generate a code coverage report
-      uses: threeal/gcovr-action@v1.0.0
+        lcov --directory . --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*/test/*' '*/Doctest.hpp' '*/tests.cpp' '*/Tela.cpp' '*/main.cpp' --output-file coverage.info
+        lcov --list coverage.info
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
       with:
-        xml-out: coverage.xml
-        coveralls-send: true  # Optional: Send to Coveralls if needed
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        excludes: |
-          include/Doctest.hpp
-          src/tests.cpp
-          src/Tela.cpp
-          src/main.cpp
+        files: coverage.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
