@@ -20,9 +20,12 @@ jobs:
       run: |
         make
 
-    - name: Run unit tests and generate coverage info
+    - name: Run unit tests
       run: |
         make test
+        
+    - name: Generate coverage info
+      run: |
         lcov --directory . --capture --output-file coverage.info
         lcov --remove coverage.info '/usr/*' '*/test/*' '*/Doctest.hpp' '*/tests.cpp' '*/Tela.cpp' '*/main.cpp' --output-file coverage.info
         lcov --list coverage.info
